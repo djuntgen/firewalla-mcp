@@ -9,25 +9,20 @@ Full read/write: list and inspect your Firewalla boxes, alarms, devices, and flo
 
 ## Prerequisites
 
-- An MSP-managed Firewalla box, and an MSP API personal access token (Firewalla MSP dashboard → Settings → API)
+- A Firewalla box managed by [Firewalla MSP](https://firewalla.com/msp) (the MSP API requires an active MSP subscription), and an MSP API personal access token (MSP dashboard → Settings → API)
 - [`uv`](https://docs.astral.sh/uv/) installed (`curl -LsSf https://astral.sh/uv/install.sh | sh`)
 
-## Setup
+## Configuration
 
-```bash
-git clone https://github.com/djuntgen/firewalla-mcp.git
-cd firewalla-mcp
-uv sync
-```
+The server reads its configuration from environment variables at startup:
 
-The server reads two environment variables at startup:
+| Variable | Required | Description |
+|---|---|---|
+| `FIREWALLA_MSP_DOMAIN` | yes | Your MSP domain, e.g. `your-alias.firewalla.net` (a pasted `https://` prefix or trailing slash is tolerated) |
+| `FIREWALLA_TOKEN` | yes | Your Firewalla MSP API personal access token |
+| `FIREWALLA_TIMEOUT` | no | HTTP timeout in seconds (default `10`) |
 
-| Variable | Description |
-|---|---|
-| `FIREWALLA_MSP_DOMAIN` | Your MSP domain, e.g. `your-alias.firewalla.net` |
-| `FIREWALLA_TOKEN` | Your Firewalla MSP API personal access token |
-
-Export them however fits your workflow — a `.env` file loaded by your shell, a secrets manager, or directly:
+Resolve the token from a secrets manager rather than storing it in plaintext:
 
 ```bash
 export FIREWALLA_MSP_DOMAIN="your-alias.firewalla.net"
@@ -36,11 +31,33 @@ export FIREWALLA_TOKEN="$(op read 'op://Vault/Firewalla PAT/password')"  # examp
 
 ## Register with Claude Code
 
+No clone needed — run straight from GitHub with `uvx`:
+
 ```bash
-claude mcp add firewalla --env FIREWALLA_MSP_DOMAIN="your-alias.firewalla.net" --env FIREWALLA_TOKEN="your-token" -- uv run --project /path/to/firewalla-mcp firewalla-mcp
+claude mcp add firewalla \
+  --env FIREWALLA_MSP_DOMAIN="your-alias.firewalla.net" \
+  --env FIREWALLA_TOKEN="$(op read 'op://Vault/Firewalla PAT/password')" \
+  -- uvx --from git+https://github.com/djuntgen/firewalla-mcp firewalla-mcp
+```
+
+Or from a local clone:
+
+```bash
+git clone https://github.com/djuntgen/firewalla-mcp.git && cd firewalla-mcp && uv sync
+claude mcp add firewalla \
+  --env FIREWALLA_MSP_DOMAIN="your-alias.firewalla.net" \
+  --env FIREWALLA_TOKEN="$(op read 'op://Vault/Firewalla PAT/password')" \
+  -- uv run --project /path/to/firewalla-mcp firewalla-mcp
 ```
 
 This registers the server at local scope (machine-specific, not committed to a shared `.mcp.json`).
+
+> **Note on token storage:** `--env` values are stored in plaintext in your MCP client's
+> config file (e.g. `~/.claude.json`). To keep the token out of persistent config
+> entirely, register a small wrapper script as the command instead — it exports the
+> variables (resolving the token live from your secrets manager) and `exec`s
+> `uvx --from git+https://github.com/djuntgen/firewalla-mcp firewalla-mcp`.
+> See [SECURITY.md](SECURITY.md).
 
 ## Tools
 
@@ -60,13 +77,17 @@ Full read/write — there is no server-side dry-run gate on writes. Rely on your
 
 ## Error handling
 
-HTTP 4xx responses fail immediately. HTTP 5xx responses and connection errors are retried once (0.5s backoff) before failing, raising `FirewallaAPIError(status_code, body)`.
+- HTTP 4xx responses fail immediately (no retry), raising `FirewallaAPIError(status_code, body)`; error bodies are truncated to keep failures readable.
+- HTTP 429 (rate limited) is retried once, honoring `Retry-After` up to 10s.
+- HTTP 5xx and connection errors are retried once (0.5s backoff) — **except** for the non-idempotent creates (`create_rule`, `create_target_list`), which are never retried, so a timed-out create can't silently duplicate a firewall rule.
+- Non-JSON responses (e.g. an HTML error page from a proxy) raise a readable error instead of a decoder traceback.
 
 ## Development
 
 ```bash
 uv sync
 uv run pytest -v
+uv run ruff check . && uv run ruff format --check .
 ```
 
 Tests are fully mocked (`respx`) — no real Firewalla API calls or credentials are needed to run the suite. See [CONTRIBUTING.md](CONTRIBUTING.md).

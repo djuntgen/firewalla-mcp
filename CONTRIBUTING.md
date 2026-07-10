@@ -5,6 +5,7 @@
 ```bash
 uv sync
 uv run pytest -v
+uv run ruff check . && uv run ruff format .
 ```
 
 No Firewalla credentials are needed to run the test suite — all HTTP calls are mocked with [`respx`](https://lundberg.pydantic.dev/respx/).
@@ -21,8 +22,9 @@ Follow existing methods as a template. Add tests for the client method (mocking 
 ## Style
 
 - TDD: write a failing test, implement, confirm it passes.
+- Formatting and linting are enforced in CI (`ruff check` + `ruff format --check`).
 - No dry-run/confirmation gate on write operations — that's a deliberate design choice; rely on the MCP client's own confirmation behavior.
-- 4xx errors from the Firewalla API should fail immediately; 5xx/connection errors retry once. Don't change this without discussion.
+- Retry policy: 4xx fails immediately; 429 retries once honoring `Retry-After`; 5xx/connection errors retry once — but never for non-idempotent creates (`create_rule`, `create_target_list`), which could be duplicated by a retry. Don't change this without discussion.
 
 ## Pull requests
 
