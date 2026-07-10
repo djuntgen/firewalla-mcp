@@ -52,7 +52,10 @@ class FirewallaClient:
     ):
         self._http = http_client or httpx.Client(
             base_url=f"https://{msp_domain}/v2",
-            headers={"Authorization": f"Token {token}", "Content-Type": "application/json"},
+            headers={
+                "Authorization": f"Token {token}",
+                "Content-Type": "application/json",
+            },
             timeout=timeout,
         )
 
@@ -120,7 +123,9 @@ class FirewallaClient:
                 return box
         raise FirewallaNotFoundError(f"box {gid} not found")
 
-    def list_devices(self, box: str | None = None, group: str | None = None) -> list[dict]:
+    def list_devices(
+        self, box: str | None = None, group: str | None = None
+    ) -> list[dict]:
         params = {}
         if box:
             params["box"] = box
@@ -218,7 +223,9 @@ class FirewallaClient:
             body["category"] = category
         if notes:
             body["notes"] = notes
-        return self._json(self._request("POST", "/target-lists", json=body, idempotent=False))
+        return self._json(
+            self._request("POST", "/target-lists", json=body, idempotent=False)
+        )
 
     def update_target_list(self, list_id: str, **fields) -> dict:
         return self._json(

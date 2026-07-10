@@ -8,7 +8,11 @@ from firewalla_mcp.client import FirewallaClient
 def test_list_alarms_default_params():
     route = respx.get(
         "https://example.firewalla.net/v2/alarms", params={"limit": "200"}
-    ).mock(return_value=httpx.Response(200, json={"count": 0, "results": [], "next_cursor": None}))
+    ).mock(
+        return_value=httpx.Response(
+            200, json={"count": 0, "results": [], "next_cursor": None}
+        )
+    )
     client = FirewallaClient("example.firewalla.net", "tok")
 
     result = client.list_alarms()
@@ -28,7 +32,11 @@ def test_list_alarms_with_query_and_paging_params():
             "sortBy": "ts:desc",
             "cursor": "abc",
         },
-    ).mock(return_value=httpx.Response(200, json={"count": 0, "results": [], "next_cursor": None}))
+    ).mock(
+        return_value=httpx.Response(
+            200, json={"count": 0, "results": [], "next_cursor": None}
+        )
+    )
     client = FirewallaClient("example.firewalla.net", "tok")
 
     client.list_alarms(

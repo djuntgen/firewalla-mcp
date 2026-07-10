@@ -199,9 +199,9 @@ def test_non_json_2xx_raises_readable_error():
 
 @respx.mock
 def test_path_params_are_url_escaped():
-    route = respx.delete("https://example.firewalla.net/v2/rules/abc%2F..%2Fpause").mock(
-        return_value=httpx.Response(200, json={})
-    )
+    route = respx.delete(
+        "https://example.firewalla.net/v2/rules/abc%2F..%2Fpause"
+    ).mock(return_value=httpx.Response(200, json={}))
     client = FirewallaClient("example.firewalla.net", "tok")
 
     client.delete_rule("abc/../pause")

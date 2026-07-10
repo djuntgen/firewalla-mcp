@@ -39,7 +39,9 @@ def test_all_tools_registered():
 def test_main_fails_fast_on_missing_config(monkeypatch):
     monkeypatch.delenv("FIREWALLA_TOKEN", raising=False)
     monkeypatch.delenv("FIREWALLA_MSP_DOMAIN", raising=False)
-    monkeypatch.setattr(server.mcp, "run", lambda **kwargs: pytest.fail("server must not start"))
+    monkeypatch.setattr(
+        server.mcp, "run", lambda **kwargs: pytest.fail("server must not start")
+    )
 
     with pytest.raises(RuntimeError, match="FIREWALLA_"):
         server.main()

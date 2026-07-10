@@ -8,7 +8,11 @@ from firewalla_mcp.client import FirewallaClient
 def test_list_flows_default_params():
     route = respx.get(
         "https://example.firewalla.net/v2/flows", params={"limit": "200"}
-    ).mock(return_value=httpx.Response(200, json={"count": 0, "results": [], "next_cursor": None}))
+    ).mock(
+        return_value=httpx.Response(
+            200, json={"count": 0, "results": [], "next_cursor": None}
+        )
+    )
     client = FirewallaClient("example.firewalla.net", "tok")
 
     result = client.list_flows()
@@ -27,10 +31,16 @@ def test_list_flows_with_query_and_grouping():
             "groupBy": "device",
             "sortBy": "total:desc",
         },
-    ).mock(return_value=httpx.Response(200, json={"count": 0, "results": [], "next_cursor": None}))
+    ).mock(
+        return_value=httpx.Response(
+            200, json={"count": 0, "results": [], "next_cursor": None}
+        )
+    )
     client = FirewallaClient("example.firewalla.net", "tok")
 
-    client.list_flows(query="ts:1000-2000", group_by="device", sort_by="total:desc", limit=5)
+    client.list_flows(
+        query="ts:1000-2000", group_by="device", sort_by="total:desc", limit=5
+    )
 
     assert route.called
 

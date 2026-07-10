@@ -154,7 +154,12 @@ def update_target_list(
     """Update mutable fields of an existing target list. Only non-null fields are sent."""
     fields = {
         k: v
-        for k, v in {"name": name, "targets": targets, "category": category, "notes": notes}.items()
+        for k, v in {
+            "name": name,
+            "targets": targets,
+            "category": category,
+            "notes": notes,
+        }.items()
         if v is not None
     }
     return get_client().update_target_list(list_id, **fields)
