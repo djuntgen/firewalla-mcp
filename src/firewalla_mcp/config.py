@@ -18,4 +18,22 @@ def get_msp_domain() -> str:
             "FIREWALLA_MSP_DOMAIN is not set. Export your Firewalla MSP domain, "
             "e.g. FIREWALLA_MSP_DOMAIN=your-alias.firewalla.net"
         )
+    domain = domain.removeprefix("https://").removeprefix("http://").rstrip("/")
+    if "/" in domain:
+        raise RuntimeError(
+            f"FIREWALLA_MSP_DOMAIN must be a bare hostname like "
+            f"your-alias.firewalla.net, got {domain!r}"
+        )
     return domain
+
+
+def get_timeout() -> float:
+    raw = os.environ.get("FIREWALLA_TIMEOUT", "").strip()
+    if not raw:
+        return 10.0
+    try:
+        return float(raw)
+    except ValueError:
+        raise RuntimeError(
+            f"FIREWALLA_TIMEOUT must be a number of seconds, got {raw!r}"
+        ) from None
