@@ -1,7 +1,7 @@
 from mcp.server.fastmcp import FastMCP
 
 from firewalla_mcp.client import FirewallaClient
-from firewalla_mcp.config import get_msp_domain, get_token
+from firewalla_mcp.config import get_msp_domain, get_timeout, get_token
 
 mcp = FastMCP("firewalla")
 _client: FirewallaClient | None = None
@@ -10,7 +10,7 @@ _client: FirewallaClient | None = None
 def get_client() -> FirewallaClient:
     global _client
     if _client is None:
-        _client = FirewallaClient(get_msp_domain(), get_token())
+        _client = FirewallaClient(get_msp_domain(), get_token(), timeout=get_timeout())
     return _client
 
 
@@ -54,7 +54,7 @@ def get_alarm(gid: str, aid: str) -> dict:
 
 @mcp.tool()
 def delete_alarm(gid: str, aid: str) -> str:
-    """Delete an alarm by box gid and alarm id."""
+    """Delete an alarm by box gid and alarm id. This is irreversible."""
     get_client().delete_alarm(gid, aid)
     return f"Deleted alarm {aid} on box {gid}"
 
@@ -67,7 +67,18 @@ def list_rules(query: str | None = None) -> dict:
 
 @mcp.tool()
 def create_rule(rule: dict) -> dict:
-    """Create a new firewall rule. `rule` is a Firewalla rule object; `action` must be 'block' or 'allow'."""
+    """Create a new firewall rule.
+
+    `rule` is a Firewalla rule object. Required fields: `action` ('block' or 'allow')
+    and `target` (e.g. {"type": "domain", "value": "example.com"} or
+    {"type": "ip", "value": "1.2.3.4"}). Common optional fields: `direction`
+    ('bidirection', 'inbound', or 'outbound'), `gid` (box to create the rule on),
+    `scope` (e.g. {"type": "device", "value": "<device gid>"} to limit the rule to
+    one device; omit for network-wide), `schedule`, and `notes`.
+
+    Example: {"action": "block", "target": {"type": "domain", "value": "example.com"},
+    "direction": "bidirection", "gid": "<box gid>"}
+    """
     return get_client().create_rule(rule)
 
 
@@ -87,7 +98,7 @@ def resume_rule(rule_id: str) -> str:
 
 @mcp.tool()
 def delete_rule(rule_id: str) -> str:
-    """Delete a firewall rule by id."""
+    """Delete a firewall rule by id. This is irreversible — consider pause_rule to disable it reversibly."""
     get_client().delete_rule(rule_id)
     return f"Deleted rule {rule_id}"
 
@@ -151,7 +162,7 @@ def update_target_list(
 
 @mcp.tool()
 def delete_target_list(list_id: str) -> str:
-    """Delete a target list by id."""
+    """Delete a target list by id. This is irreversible; rules referencing it lose their targets."""
     get_client().delete_target_list(list_id)
     return f"Deleted target list {list_id}"
 
@@ -169,6 +180,11 @@ def get_alarm_trends(group: str | None = None) -> list[dict]:
 
 
 def main() -> None:
+    # Validate configuration before serving so a misconfigured environment
+    # fails at startup with a clear message, not at the first tool call.
+    get_msp_domain()
+    get_token()
+    get_timeout()
     mcp.run(transport="stdio")
 
 
