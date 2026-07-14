@@ -68,12 +68,14 @@ One tool per Firewalla MSP API v2 operation:
 | Boxes | `list_boxes`, `get_box` |
 | Devices | `list_devices` |
 | Alarms | `list_alarms`, `get_alarm`, `delete_alarm` |
-| Rules | `list_rules`, `create_rule`, `pause_rule`, `resume_rule`, `delete_rule` |
+| Rules | `list_rules`, `get_rule`, `create_rule`, `update_rule`, `pause_rule`, `resume_rule`, `delete_rule` |
 | Flows | `list_flows` |
 | Target Lists | `list_target_lists`, `get_target_list`, `create_target_list`, `update_target_list`, `delete_target_list` |
 | Trends | `get_flow_trends`, `get_alarm_trends` |
 
 Full read/write — there is no server-side dry-run gate on writes. Rely on your MCP client's normal confirmation prompts before destructive actions (`delete_rule`, `delete_target_list`, `delete_alarm`).
+
+> **`update_rule` note:** Firewalla's MSP API has no rule-edit endpoint, so `update_rule` recreates the rule (create replacement → delete original). The rule **id changes**, and the returned value reports both the deleted id and the new rule.
 
 ## Error handling
 

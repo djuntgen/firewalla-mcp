@@ -8,6 +8,24 @@ RETRY_BACKOFF_SECONDS = 0.5
 MAX_RETRY_AFTER_SECONDS = 10
 MAX_ERROR_BODY_CHARS = 500
 
+# Fields accepted when creating a rule. The MSP API has no rule-update
+# endpoint, so update_rule() recreates a rule from its current state; only
+# these fields are carried over (server-managed ones like id/ts/hit are dropped).
+RULE_CREATE_FIELDS = frozenset(
+    {
+        "action",
+        "target",
+        "direction",
+        "gid",
+        "group",
+        "scope",
+        "notes",
+        "schedule",
+        "protocol",
+        "status",
+    }
+)
+
 
 def _quote(segment: str) -> str:
     return quote(segment, safe="")
@@ -164,6 +182,24 @@ class FirewallaClient:
 
     def create_rule(self, rule: dict) -> dict:
         return self._json(self._request("POST", "/rules", json=rule, idempotent=False))
+
+    def get_rule(self, rule_id: str) -> dict:
+        for rule in self.list_rules().get("results", []):
+            if rule.get("id") == rule_id:
+                return rule
+        raise FirewallaNotFoundError(f"rule {rule_id} not found")
+
+    def update_rule(self, rule_id: str, changes: dict) -> dict:
+        # The MSP API has no rule-update endpoint, so "edit" means recreate:
+        # build a fresh rule from the current one plus the caller's changes,
+        # create it FIRST (so a failure never loses the rule), then delete the
+        # original. The new rule gets a new id.
+        current = self.get_rule(rule_id)
+        body = {k: v for k, v in current.items() if k in RULE_CREATE_FIELDS}
+        body.update(changes)
+        new_rule = self.create_rule(body)
+        self.delete_rule(rule_id)
+        return {"deleted_id": rule_id, "rule": new_rule}
 
     def pause_rule(self, rule_id: str) -> None:
         self._request("POST", f"/rules/{_quote(rule_id)}/pause")

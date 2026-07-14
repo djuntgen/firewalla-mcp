@@ -66,6 +66,33 @@ def list_rules(query: str | None = None) -> dict:
 
 
 @mcp.tool()
+def get_rule(rule_id: str) -> dict:
+    """Get a single firewall rule by id (fetched by filtering the rule list)."""
+    return get_client().get_rule(rule_id)
+
+
+@mcp.tool()
+def update_rule(rule_id: str, changes: dict) -> dict:
+    """Edit an existing firewall rule.
+
+    Firewalla's MSP API has NO native rule-edit endpoint, so this recreates the
+    rule: it builds a new rule from the current one with your `changes` applied,
+    creates it, then deletes the original. **The rule id changes** — the return
+    value is {"deleted_id": <old id>, "rule": <new rule with new id>}. The new
+    rule is created before the old one is deleted, so a failure never leaves you
+    with no rule.
+
+    `changes` is a dict of top-level rule fields to override; each field replaces
+    the existing value wholesale (no deep merge). Common example — change a rule's
+    schedule to block 17:00-09:00 daily:
+    {"schedule": {"cronTime": "0 17 * * *", "duration": 57600}}
+    (cronTime = when the block STARTS; duration = seconds it lasts, so 57600 = 16h.)
+    To clear a schedule (make it always-on), pass {"schedule": null}.
+    """
+    return get_client().update_rule(rule_id, changes)
+
+
+@mcp.tool()
 def create_rule(rule: dict) -> dict:
     """Create a new firewall rule.
 

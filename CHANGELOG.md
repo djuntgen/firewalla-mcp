@@ -5,6 +5,13 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-07-13
+
+### Added
+
+- `get_rule` tool — fetch a single rule by id (the MSP API has no GET-by-id, so it filters the rule list).
+- `update_rule` tool — edit an existing rule. The MSP API has **no** rule-update endpoint, so this recreates the rule: it builds a replacement from the current rule plus the caller's `changes`, creates it, then deletes the original. The new rule gets a new id (`{"deleted_id": ..., "rule": ...}`). The replacement is created *before* the original is deleted, so a failure never leaves you with no rule. Server-managed fields (`id`, `ts`, `updateTs`, `hit`) are stripped from the recreate body.
+
 ## [0.2.0] - 2026-07-10
 
 ### Changed
