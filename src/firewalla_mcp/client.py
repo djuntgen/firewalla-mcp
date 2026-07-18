@@ -188,6 +188,41 @@ class FirewallaClient:
     def delete_alarm(self, gid: str, aid: str) -> None:
         self._request("DELETE", f"/alarms/{_quote(gid)}/{_quote(aid)}")
 
+    def mute_alarm(
+        self,
+        gid: str,
+        aid: str,
+        *,
+        target_type: str = "alarmType",
+        target_value: str | None = None,
+        scope_type: str = "all",
+        scope_value: str | None = None,
+    ) -> None:
+        # POST /alarms/{gid}/{aid}/mute. target.type: 'alarmType'|'domain'
+        # (value required for domain); scope.type: 'all'|'device' (value =
+        # device MAC, required for device).
+        target: dict = {"type": target_type}
+        if target_value is not None:
+            target["value"] = target_value
+        scope: dict = {"type": scope_type}
+        if scope_value is not None:
+            scope["value"] = scope_value
+        self._request(
+            "POST",
+            f"/alarms/{_quote(gid)}/{_quote(aid)}/mute",
+            json={"target": target, "scope": scope},
+            idempotent=False,
+        )
+
+    def archive_alarm(self, gid: str, aid: str) -> None:
+        # POST /alarms/{gid}/{aid}/archive — no body; moves the alarm to the
+        # archived state (keeps the record, unlike delete_alarm).
+        self._request(
+            "POST",
+            f"/alarms/{_quote(gid)}/{_quote(aid)}/archive",
+            idempotent=False,
+        )
+
     def list_rules(self, query: str | None = None) -> dict:
         params = {"query": query} if query else None
         return self._json(self._request("GET", "/rules", params=params))

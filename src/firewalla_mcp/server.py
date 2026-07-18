@@ -68,6 +68,35 @@ def delete_alarm(gid: str, aid: str) -> str:
 
 
 @mcp.tool()
+def mute_alarm(
+    gid: str,
+    aid: str,
+    target_type: str = "alarmType",
+    target_value: str | None = None,
+    scope_type: str = "all",
+    scope_value: str | None = None,
+) -> str:
+    """Mute an alarm so its future recurrences stop alerting (without a rule).
+    Defaults mute THIS alarm's whole type, network-wide. `target_type`:
+    'alarmType' (no value) or 'domain' (target_value = the domain). `scope_type`:
+    'all' or 'device' (scope_value = device MAC)."""
+    get_client().mute_alarm(
+        gid, aid,
+        target_type=target_type, target_value=target_value,
+        scope_type=scope_type, scope_value=scope_value,
+    )
+    return f"Muted alarm {aid} on box {gid} (target={target_type}, scope={scope_type})"
+
+
+@mcp.tool()
+def archive_alarm(gid: str, aid: str) -> str:
+    """Archive an alarm: dismiss it from the active list but KEEP the record
+    (unlike delete_alarm, which is irreversible)."""
+    get_client().archive_alarm(gid, aid)
+    return f"Archived alarm {aid} on box {gid}"
+
+
+@mcp.tool()
 def list_rules(query: str | None = None) -> dict:
     """List firewall rules. `query` supports Firewalla's search syntax, e.g. 'status:paused action:allow'."""
     return get_client().list_rules(query=query)

@@ -14,6 +14,8 @@ EXPECTED_TOOL_NAMES = {
     "list_alarms",
     "get_alarm",
     "delete_alarm",
+    "mute_alarm",
+    "archive_alarm",
     "list_rules",
     "get_rule",
     "create_rule",
