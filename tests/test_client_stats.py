@@ -47,3 +47,16 @@ def test_get_stats_type_in_path_with_limit():
 
     assert route.called
     assert result[0]["value"] == 9
+
+
+@respx.mock
+def test_get_stats_with_group():
+    route = respx.get(
+        "https://example.firewalla.net/v2/stats/topBoxesBySecurityAlarms",
+        params={"group": "g1"},
+    ).mock(return_value=httpx.Response(200, json=[]))
+    client = FirewallaClient("example.firewalla.net", "tok")
+
+    client.get_stats("topBoxesBySecurityAlarms", group="g1")
+
+    assert route.called
