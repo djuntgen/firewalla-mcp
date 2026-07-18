@@ -151,6 +151,18 @@ class FirewallaClient:
             params["group"] = group
         return self._json(self._request("GET", "/devices", params=params or None))
 
+    def update_device(self, gid: str, device_id: str, name: str) -> dict:
+        # PATCH /boxes/{gid}/devices/{id}; `name` is the only updatable field
+        # (max 32 chars, enforced server-side).
+        return self._json(
+            self._request(
+                "PATCH",
+                f"/boxes/{_quote(gid)}/devices/{_quote(device_id)}",
+                json={"name": name},
+                idempotent=False,
+            )
+        )
+
     def list_alarms(
         self,
         query: str | None = None,
@@ -175,6 +187,41 @@ class FirewallaClient:
 
     def delete_alarm(self, gid: str, aid: str) -> None:
         self._request("DELETE", f"/alarms/{_quote(gid)}/{_quote(aid)}")
+
+    def mute_alarm(
+        self,
+        gid: str,
+        aid: str,
+        *,
+        target_type: str = "alarmType",
+        target_value: str | None = None,
+        scope_type: str = "all",
+        scope_value: str | None = None,
+    ) -> None:
+        # POST /alarms/{gid}/{aid}/mute. target.type: 'alarmType'|'domain'
+        # (value required for domain); scope.type: 'all'|'device' (value =
+        # device MAC, required for device).
+        target: dict = {"type": target_type}
+        if target_value is not None:
+            target["value"] = target_value
+        scope: dict = {"type": scope_type}
+        if scope_value is not None:
+            scope["value"] = scope_value
+        self._request(
+            "POST",
+            f"/alarms/{_quote(gid)}/{_quote(aid)}/mute",
+            json={"target": target, "scope": scope},
+            idempotent=False,
+        )
+
+    def archive_alarm(self, gid: str, aid: str) -> None:
+        # POST /alarms/{gid}/{aid}/archive — no body; moves the alarm to the
+        # archived state (keeps the record, unlike delete_alarm).
+        self._request(
+            "POST",
+            f"/alarms/{_quote(gid)}/{_quote(aid)}/archive",
+            idempotent=False,
+        )
 
     def list_rules(self, query: str | None = None) -> dict:
         params = {"query": query} if query else None
@@ -236,6 +283,26 @@ class FirewallaClient:
     def get_alarm_trends(self, group: str | None = None) -> list[dict]:
         params = {"group": group} if group else None
         return self._json(self._request("GET", "/trends/alarms", params=params))
+
+    def get_rule_trends(self, group: str | None = None) -> list[dict]:
+        params = {"group": group} if group else None
+        return self._json(self._request("GET", "/trends/rules", params=params))
+
+    def get_simple_stats(self, group: str | None = None) -> dict:
+        params = {"group": group} if group else None
+        return self._json(self._request("GET", "/stats/simple", params=params))
+
+    def get_stats(
+        self, stats_type: str, group: str | None = None, limit: int | None = None
+    ) -> list[dict]:
+        params: dict = {}
+        if group:
+            params["group"] = group
+        if limit is not None:
+            params["limit"] = limit
+        return self._json(
+            self._request("GET", f"/stats/{_quote(stats_type)}", params=params or None)
+        )
 
     def list_target_lists(self, owner: str | None = None) -> list[dict]:
         params = {"owner": owner} if owner else None

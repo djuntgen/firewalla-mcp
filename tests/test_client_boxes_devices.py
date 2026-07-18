@@ -1,4 +1,5 @@
 import httpx
+import json
 import pytest
 import respx
 
@@ -77,3 +78,17 @@ def test_list_devices_with_box_and_group():
     client.list_devices(box="box-1", group="g1")
 
     assert route.called
+
+
+@respx.mock
+def test_update_device_renames():
+    route = respx.patch(
+        "https://example.firewalla.net/v2/boxes/box-1/devices/dev-9"
+    ).mock(return_value=httpx.Response(200, json={"id": "dev-9", "name": "Matthew-PC"}))
+    client = FirewallaClient("example.firewalla.net", "tok")
+
+    result = client.update_device("box-1", "dev-9", "Matthew-PC")
+
+    assert route.called
+    assert json.loads(route.calls.last.request.content) == {"name": "Matthew-PC"}
+    assert result == {"id": "dev-9", "name": "Matthew-PC"}

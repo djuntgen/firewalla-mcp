@@ -66,12 +66,13 @@ One tool per Firewalla MSP API v2 operation:
 | Category | Tools |
 |---|---|
 | Boxes | `list_boxes`, `get_box` |
-| Devices | `list_devices` |
-| Alarms | `list_alarms`, `get_alarm`, `delete_alarm` |
+| Devices | `list_devices`, `update_device` (rename a device — the only API-updatable field) |
+| Alarms | `list_alarms`, `get_alarm`, `delete_alarm`, `mute_alarm` (mute an alarm's future recurrences, by type or domain, network-wide or per-device), `archive_alarm` (archive an alarm — dismiss but keep the record) |
 | Rules | `list_rules`, `get_rule`, `create_rule`, `update_rule`, `pause_rule`, `resume_rule`, `delete_rule` |
 | Flows | `list_flows` |
 | Target Lists | `list_target_lists`, `get_target_list`, `create_target_list`, `update_target_list`, `delete_target_list` |
-| Trends | `get_flow_trends`, `get_alarm_trends` |
+| Trends | `get_flow_trends`, `get_alarm_trends`, `get_rule_trends` (daily rule-creation counts) |
+| Statistics | `get_simple_stats` (dashboard rollup: online/offline box counts, alarm count, rule count), `get_stats` (top-N leaderboards: topBoxesByBlockedFlows, topBoxesBySecurityAlarms, topRegionsByBlockedFlows) |
 
 Full read/write — there is no server-side dry-run gate on writes. Rely on your MCP client's normal confirmation prompts before destructive actions (`delete_rule`, `delete_target_list`, `delete_alarm`).
 
@@ -81,7 +82,7 @@ Full read/write — there is no server-side dry-run gate on writes. Rely on your
 
 - HTTP 4xx responses fail immediately (no retry), raising `FirewallaAPIError(status_code, body)`; error bodies are truncated to keep failures readable.
 - HTTP 429 (rate limited) is retried once, honoring `Retry-After` up to 10s.
-- HTTP 5xx and connection errors are retried once (0.5s backoff) — **except** for the non-idempotent creates (`create_rule`, `create_target_list`), which are never retried, so a timed-out create can't silently duplicate a firewall rule.
+- HTTP 5xx and connection errors are retried once (0.5s backoff) — **except** for non-idempotent writes (`create_rule`, `create_target_list`, `update_device`, `mute_alarm`, `archive_alarm`), which are never retried, so a timed-out request can't silently duplicate or double-apply a write.
 - Non-JSON responses (e.g. an HTML error page from a proxy) raise a readable error instead of a decoder traceback.
 
 ## Development

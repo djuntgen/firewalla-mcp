@@ -5,6 +5,15 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.4.0
+
+- feat(devices): `update_device` — rename a device (the only API-updatable field).
+- feat(stats): `get_simple_stats` (dashboard rollup) and `get_stats` (top-N leaderboards).
+- feat(trends): `get_rule_trends` — completes the flows/alarms/rules trend trio.
+- feat(alarms): `mute_alarm` and `archive_alarm`.
+- MSP `/v2` API parity: every documented endpoint is now wrapped. Import-target-list
+  and FireAI remain out of scope (portal-only, no API).
+
 ## [0.3.0] - 2026-07-13
 
 ### Added

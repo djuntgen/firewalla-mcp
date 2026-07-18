@@ -10,9 +10,12 @@ EXPECTED_TOOL_NAMES = {
     "list_boxes",
     "get_box",
     "list_devices",
+    "update_device",
     "list_alarms",
     "get_alarm",
     "delete_alarm",
+    "mute_alarm",
+    "archive_alarm",
     "list_rules",
     "get_rule",
     "create_rule",
@@ -28,6 +31,9 @@ EXPECTED_TOOL_NAMES = {
     "delete_target_list",
     "get_flow_trends",
     "get_alarm_trends",
+    "get_rule_trends",
+    "get_simple_stats",
+    "get_stats",
 }
 
 

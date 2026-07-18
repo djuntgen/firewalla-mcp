@@ -1,3 +1,5 @@
+import json
+
 import httpx
 import respx
 
@@ -73,3 +75,51 @@ def test_delete_alarm_path_params():
     client.delete_alarm("gid-1", "aid-1")
 
     assert route.called
+
+
+@respx.mock
+def test_mute_alarm_default_body():
+    route = respx.post(
+        "https://example.firewalla.net/v2/alarms/box-1/al-7/mute"
+    ).mock(return_value=httpx.Response(200, json={}))
+    client = FirewallaClient("example.firewalla.net", "tok")
+
+    client.mute_alarm("box-1", "al-7")
+
+    assert route.called
+    assert json.loads(route.calls.last.request.content) == {
+        "target": {"type": "alarmType"},
+        "scope": {"type": "all"},
+    }
+
+
+@respx.mock
+def test_mute_alarm_domain_and_device_include_values():
+    route = respx.post(
+        "https://example.firewalla.net/v2/alarms/box-1/al-7/mute"
+    ).mock(return_value=httpx.Response(200, json={}))
+    client = FirewallaClient("example.firewalla.net", "tok")
+
+    client.mute_alarm(
+        "box-1", "al-7",
+        target_type="domain", target_value="ads.example.com",
+        scope_type="device", scope_value="AA:BB:CC:DD:EE:FF",
+    )
+
+    assert json.loads(route.calls.last.request.content) == {
+        "target": {"type": "domain", "value": "ads.example.com"},
+        "scope": {"type": "device", "value": "AA:BB:CC:DD:EE:FF"},
+    }
+
+
+@respx.mock
+def test_archive_alarm_posts_no_body():
+    route = respx.post(
+        "https://example.firewalla.net/v2/alarms/box-1/al-7/archive"
+    ).mock(return_value=httpx.Response(200))
+    client = FirewallaClient("example.firewalla.net", "tok")
+
+    client.archive_alarm("box-1", "al-7")
+
+    assert route.called
+    assert route.calls.last.request.content in (b"", b"null")
