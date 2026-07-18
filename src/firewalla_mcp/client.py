@@ -151,6 +151,18 @@ class FirewallaClient:
             params["group"] = group
         return self._json(self._request("GET", "/devices", params=params or None))
 
+    def update_device(self, gid: str, device_id: str, name: str) -> dict:
+        # PATCH /boxes/{gid}/devices/{id}; `name` is the only updatable field
+        # (max 32 chars, enforced server-side).
+        return self._json(
+            self._request(
+                "PATCH",
+                f"/boxes/{_quote(gid)}/devices/{_quote(device_id)}",
+                json={"name": name},
+                idempotent=False,
+            )
+        )
+
     def list_alarms(
         self,
         query: str | None = None,

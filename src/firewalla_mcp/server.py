@@ -33,6 +33,14 @@ def list_devices(box: str | None = None, group: str | None = None) -> list[dict]
 
 
 @mcp.tool()
+def update_device(gid: str, device_id: str, name: str) -> dict:
+    """Rename a device. `name` is the ONLY field the API can change (max 32
+    chars; no block/pause via API). `gid` is the box id; `device_id` is a
+    device `id` from list_devices."""
+    return get_client().update_device(gid, device_id, name)
+
+
+@mcp.tool()
 def list_alarms(
     query: str | None = None,
     group_by: str | None = None,
