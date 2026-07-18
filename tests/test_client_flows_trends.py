@@ -68,3 +68,16 @@ def test_get_alarm_trends_with_group():
     client.get_alarm_trends(group="g1")
 
     assert route.called
+
+
+@respx.mock
+def test_get_rule_trends_with_group():
+    route = respx.get(
+        "https://example.firewalla.net/v2/trends/rules", params={"group": "g1"}
+    ).mock(return_value=httpx.Response(200, json=[{"ts": 1719800000, "value": 2}]))
+    client = FirewallaClient("example.firewalla.net", "tok")
+
+    trends = client.get_rule_trends(group="g1")
+
+    assert route.called
+    assert trends == [{"ts": 1719800000, "value": 2}]

@@ -220,6 +220,12 @@ def get_alarm_trends(group: str | None = None) -> list[dict]:
 
 
 @mcp.tool()
+def get_rule_trends(group: str | None = None) -> list[dict]:
+    """Get daily rule-creation counts, optionally scoped to a box group."""
+    return get_client().get_rule_trends(group=group)
+
+
+@mcp.tool()
 def get_simple_stats(group: str | None = None) -> dict:
     """Dashboard rollup for the account (optionally one box group): online/offline
     box counts, active alarm count, rule count."""

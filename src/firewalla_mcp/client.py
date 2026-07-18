@@ -249,6 +249,10 @@ class FirewallaClient:
         params = {"group": group} if group else None
         return self._json(self._request("GET", "/trends/alarms", params=params))
 
+    def get_rule_trends(self, group: str | None = None) -> list[dict]:
+        params = {"group": group} if group else None
+        return self._json(self._request("GET", "/trends/rules", params=params))
+
     def get_simple_stats(self, group: str | None = None) -> dict:
         params = {"group": group} if group else None
         return self._json(self._request("GET", "/stats/simple", params=params))
