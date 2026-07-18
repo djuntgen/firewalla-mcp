@@ -29,6 +29,8 @@ EXPECTED_TOOL_NAMES = {
     "delete_target_list",
     "get_flow_trends",
     "get_alarm_trends",
+    "get_simple_stats",
+    "get_stats",
 }
 
 

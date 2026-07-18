@@ -219,6 +219,23 @@ def get_alarm_trends(group: str | None = None) -> list[dict]:
     return get_client().get_alarm_trends(group=group)
 
 
+@mcp.tool()
+def get_simple_stats(group: str | None = None) -> dict:
+    """Dashboard rollup for the account (optionally one box group): online/offline
+    box counts, active alarm count, rule count."""
+    return get_client().get_simple_stats(group=group)
+
+
+@mcp.tool()
+def get_stats(
+    stats_type: str, group: str | None = None, limit: int | None = None
+) -> list[dict]:
+    """Top-N leaderboards. `stats_type` is one of: 'topBoxesByBlockedFlows',
+    'topBoxesBySecurityAlarms', 'topRegionsByBlockedFlows'. `limit` defaults to 5
+    server-side. Most useful across multiple boxes."""
+    return get_client().get_stats(stats_type, group=group, limit=limit)
+
+
 def main() -> None:
     # Validate configuration before serving so a misconfigured environment
     # fails at startup with a clear message, not at the first tool call.
