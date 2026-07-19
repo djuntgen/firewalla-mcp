@@ -5,6 +5,11 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.5.0
+
+- feat(users): `list_users` — the people on the account, each with `affiliatedTag` (the device-group id rules are scoped to), their devices, and the rules already applying to them. Resolves "what rules apply to <person>" directly instead of inferring a group from device names.
+- feat(apps): `list_apps` — the app ids valid as `{"type": "app", "value": ...}` rule targets. The set is small and fixed, so unsupported services must be blocked another way (e.g. an `internet` target).
+
 ## 0.4.0
 
 - feat(devices): `update_device` — rename a device (the only API-updatable field).

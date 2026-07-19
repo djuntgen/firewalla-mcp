@@ -67,6 +67,7 @@ One tool per Firewalla MSP API v2 operation:
 |---|---|
 | Boxes | `list_boxes`, `get_box` |
 | Devices | `list_devices`, `update_device` (rename a device — the only API-updatable field) |
+| People & apps | `list_users` (people → their device group, devices, and rules), `list_apps` (the app ids valid as rule targets) |
 | Alarms | `list_alarms`, `get_alarm`, `delete_alarm`, `mute_alarm` (mute an alarm's future recurrences, by type or domain, network-wide or per-device), `archive_alarm` (archive an alarm — dismiss but keep the record) |
 | Rules | `list_rules`, `get_rule`, `create_rule`, `update_rule`, `pause_rule`, `resume_rule`, `delete_rule` |
 | Flows | `list_flows` |

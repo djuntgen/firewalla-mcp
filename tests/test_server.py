@@ -10,6 +10,8 @@ EXPECTED_TOOL_NAMES = {
     "list_boxes",
     "get_box",
     "list_devices",
+    "list_users",
+    "list_apps",
     "update_device",
     "list_alarms",
     "get_alarm",

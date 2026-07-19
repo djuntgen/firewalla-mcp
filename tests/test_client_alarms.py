@@ -79,9 +79,9 @@ def test_delete_alarm_path_params():
 
 @respx.mock
 def test_mute_alarm_default_body():
-    route = respx.post(
-        "https://example.firewalla.net/v2/alarms/box-1/al-7/mute"
-    ).mock(return_value=httpx.Response(200, json={}))
+    route = respx.post("https://example.firewalla.net/v2/alarms/box-1/al-7/mute").mock(
+        return_value=httpx.Response(200, json={})
+    )
     client = FirewallaClient("example.firewalla.net", "tok")
 
     client.mute_alarm("box-1", "al-7")
@@ -95,15 +95,18 @@ def test_mute_alarm_default_body():
 
 @respx.mock
 def test_mute_alarm_domain_and_device_include_values():
-    route = respx.post(
-        "https://example.firewalla.net/v2/alarms/box-1/al-7/mute"
-    ).mock(return_value=httpx.Response(200, json={}))
+    route = respx.post("https://example.firewalla.net/v2/alarms/box-1/al-7/mute").mock(
+        return_value=httpx.Response(200, json={})
+    )
     client = FirewallaClient("example.firewalla.net", "tok")
 
     client.mute_alarm(
-        "box-1", "al-7",
-        target_type="domain", target_value="ads.example.com",
-        scope_type="device", scope_value="AA:BB:CC:DD:EE:FF",
+        "box-1",
+        "al-7",
+        target_type="domain",
+        target_value="ads.example.com",
+        scope_type="device",
+        scope_value="AA:BB:CC:DD:EE:FF",
     )
 
     assert json.loads(route.calls.last.request.content) == {

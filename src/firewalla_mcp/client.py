@@ -223,6 +223,12 @@ class FirewallaClient:
             idempotent=False,
         )
 
+    def list_users(self) -> list[dict]:
+        return self._json(self._request("GET", "/users"))
+
+    def list_apps(self) -> list[dict]:
+        return self._json(self._request("GET", "/apps"))
+
     def list_rules(self, query: str | None = None) -> dict:
         params = {"query": query} if query else None
         return self._json(self._request("GET", "/rules", params=params))

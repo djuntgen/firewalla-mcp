@@ -38,7 +38,8 @@ def test_get_stats_type_in_path_with_limit():
         params={"limit": "3"},
     ).mock(
         return_value=httpx.Response(
-            200, json=[{"meta": {"gid": "b1", "name": "Home", "model": "gold"}, "value": 9}]
+            200,
+            json=[{"meta": {"gid": "b1", "name": "Home", "model": "gold"}, "value": 9}],
         )
     )
     client = FirewallaClient("example.firewalla.net", "tok")
