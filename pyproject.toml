@@ -1,6 +1,6 @@
 [project]
 name = "firewalla-mcp"
-version = "0.5.0"
+version = "0.5.1"
 description = "MCP server wrapping the Firewalla MSP API"
 readme = "README.md"
 license = "MIT"

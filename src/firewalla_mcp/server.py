@@ -102,10 +102,16 @@ def mute_alarm(
     scope_type: str = "all",
     scope_value: str | None = None,
 ) -> str:
-    """Mute an alarm so its future recurrences stop alerting (without a rule).
-    Defaults mute THIS alarm's whole type, network-wide. `target_type`:
-    'alarmType' (no value) or 'domain' (target_value = the domain). `scope_type`:
-    'all' or 'device' (scope_value = device MAC)."""
+    """Mute an alarm: archives it AND tells the box to create a silence
+    exception, so future traffic matching it stops raising new alarms.
+
+    This is broader than it looks — the DEFAULTS silence this alarm's entire
+    type across the whole network. Narrow it deliberately:
+    `target_type`: 'alarmType' (no value — silences every alarm of this type) or
+    'domain' (target_value = the domain, silences just that domain).
+    `scope_type`: 'all' (network-wide) or 'device' (scope_value = device MAC).
+
+    Use archive_alarm instead to dismiss one alarm without silencing future ones."""
     get_client().mute_alarm(
         gid,
         aid,
@@ -120,7 +126,10 @@ def mute_alarm(
 @mcp.tool()
 def archive_alarm(gid: str, aid: str) -> str:
     """Archive an alarm: dismiss it from the active list but KEEP the record
-    (unlike delete_alarm, which is irreversible)."""
+    (unlike delete_alarm, which is irreversible).
+
+    Unlike mute_alarm, this does NOT stop matching traffic from raising new
+    alarms later — it only clears this one."""
     get_client().archive_alarm(gid, aid)
     return f"Archived alarm {aid} on box {gid}"
 

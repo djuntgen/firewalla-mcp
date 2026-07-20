@@ -5,6 +5,10 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.5.1
+
+- docs(alarms): correct the `mute_alarm` and `archive_alarm` tool descriptions against the official API reference. Muting also **archives** the alarm and creates a silence exception (the previous wording omitted both), and its defaults silence the alarm's entire type network-wide — now called out explicitly, since these descriptions are the only guidance the calling model gets. `archive_alarm` now states that it does not suppress future alarms.
+
 ## 0.5.0
 
 - feat(users): `list_users` — the people on the account, each with `affiliatedTag` (the device-group id rules are scoped to), their devices, and the rules already applying to them. Resolves "what rules apply to <person>" directly instead of inferring a group from device names.
